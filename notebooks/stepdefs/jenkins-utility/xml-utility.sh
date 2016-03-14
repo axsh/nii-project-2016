@@ -1,8 +1,21 @@
 #!/bin/bash
 
+function replace_git_repo() {
+    local file="${1}" user_git_repo="https://gituhb.com/${GITHUB_USER}/${GITHUB_REPO}.git"
+    local default_repo=$(cat /home/centos/notebooks/stepdefs/jenkins-config/${file} | grep -oP '(?<=<url>).*?(?=</url>)')
+
+    ${ssh} <<EOF 2> /dev/null
+        echo ${user_git_repo}
+        sed -i "s@${default_repo}@${user_git_repo}@g" /home/${file}
+EOF
+}
+
 function xml_to_vm() {
     for file in "${xml_file[@]}"; do
         scp -i /home/centos/mykeypair /home/centos/notebooks/stepdefs/jenkins-config/${file} root@10.0.2.100:/home &> /dev/null
+        if [ ! -z ${GITHUB_USER} ] && [ ! -z ${GITHUB_REPO} ] ; then
+            replace_git_repo ${file}
+        fi
     done
 }
 

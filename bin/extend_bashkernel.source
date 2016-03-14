@@ -165,6 +165,21 @@ get_cell_command()
 
 global_mode=none
 
+set_if_cell_includes()
+{
+    token="$1"
+    var_name="$2"
+    if [[ "$input" == *"$token"* ]] ; then
+        set_value=true
+        read value <<< "${input#*$token}"
+        value="${value//\"/}"
+        value="${value//\'/}"
+        export "$var_name"="$value"
+        var_name="${var_name//_/ }"
+        echo "Changing ${var_name,,} to '$value'"
+    fi
+}
+
 # for testing:
 while sleep 0.2; do
     ls -l /proc/$BASHPID/fd >>/tmp/sbash.log
@@ -177,15 +192,17 @@ while sleep 0.2; do
       break
     fi
 
-    if [[ "$input" == *set-global-evaluation-mode* ]]; then
-	after="${input#*set-global-evaluation-mode}"
-	read themode therest <<<"$after"
-	themode="${themode//\"/}"
-	themode="${themode//\'/}"
-	echo "Changing global mode to '$themode'"
-	export global_mode="$themode"
-	echo -n "$PS1"
-	continue
+    set_value=false
+
+    set_if_cell_includes set-global-evaluation-mode global_mode
+    set_if_cell_includes set-github-user GITHUB_USER
+    set_if_cell_includes set-github-repo GITHUB_REPO
+    set_if_cell_includes set-hipchat-id HIPCHAT_ID
+    set_if_cell_includes set-hipchat-token HIPCHAT_TOKEN
+
+    if $set_value ; then
+         echo -n "$PS1"
+         continue
     fi
 
     jd="$(new_job_dir)"
