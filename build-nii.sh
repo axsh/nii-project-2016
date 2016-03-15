@@ -319,11 +319,15 @@ EOF
 
 ## Dynamically generate the steps for these:
 enable_these="
-  testing/hierarchical_collapse/main
+  usability/collapsible_headings/main
   usability/init_cell/main
   usability/runtools/main
   usability/toc2/main
 "
+
+# Note, it seems that collapsible_heading has replaced hierarchical_collapse,
+# Therefore from the above I just removed this:  testing/hierarchical_collapse/main
+
 cfg_path="./.jupyter/nbconfig/notebook.json"
 for ext in $enable_these; do
     (
