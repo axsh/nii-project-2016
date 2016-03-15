@@ -49,9 +49,175 @@ set -eux
 set -o pipefail
 
 export PATH=$PATH:/opt/axsh/wakame-vdc/client/mussel/bin
-cd ciscripts
 
-WRITE_FILE=${WORKSPACE}/${BUILD_TAG} IMAGE_ID=${image_id} YUM_HOST=${yum_host} ./image-build.sh
+SCRIPT_DIR=&quot;${WORKSPACE}/ciscripts/wakame-vdc&quot;
+WRITE_FILE=&quot;${WORKSPACE}/${BUILD_TAG}&quot;
+IMAGE_ID=&quot;${image_id}&quot;
+YUM_HOST=&quot;${yum_host}&quot;
+
+cd ${SCRIPT_DIR}
+
+# wait for the instance to be running
+. retry.sh
+
+# vifs
+network_id=&quot;nw-demo1&quot;
+security_group_id=&quot;sg-cicddemo&quot;
+vifs=vifs.json
+
+# instance-specific parameter
+cpu_cores=&quot;1&quot;
+hypervisor=&quot;openvz&quot;
+memory_size=&quot;512&quot;
+image_id=&quot;${IMAGE_ID}&quot;
+ssh_key_id=&quot;ssh-cicddemo&quot;
+
+# create an musselrc
+cat &lt;&lt;EOS &gt; ~/.musselrc
+DCMGR_HOST=10.0.2.15
+account_id=a-shpoolxx
+EOS
+
+# create an vifs
+cat &lt;&lt;EOS &gt; &quot;${vifs}&quot;
+{ 
+	&quot;eth0&quot;:{&quot;network&quot;:&quot;${network_id}&quot;,&quot;security_groups&quot;:&quot;${security_group_id}&quot;}
+}
+EOS
+## create database image
+
+# db display name
+display_name=&quot;db&quot;
+
+# create an instance
+instance_id=&quot;$(
+  mussel instance create \
+  --cpu-cores    &quot;${cpu_cores}&quot;    \
+  --hypervisor   &quot;${hypervisor}&quot;   \
+  --image-id     &quot;${image_id}&quot;     \
+  --memory-size  &quot;${memory_size}&quot;  \
+  --ssh-key-id   &quot;${ssh_key_id}&quot;   \
+  --vifs         &quot;${vifs}&quot;         \
+  --display-name &quot;${display_name}&quot; \
+  | egrep ^:id: | awk &apos;{print $2}&apos;
+)&quot;
+
+: &quot;${instance_id:?&quot;should not be empty&quot;}&quot;
+echo &quot;${instance_id} is initializing...&quot;
+
+trap &apos;mussel instance destroy &quot;${instance_id}&quot;&apos; ERR
+
+# wait for the instance to be running
+retry_until [[ &apos;&quot;$(mussel instance show &quot;${instance_id}&quot; | egrep -w &quot;^:state: running&quot;)&quot;&apos; ]]
+echo &quot;${instance_id} is running&quot;
+
+# get instance ipaddr
+ipaddr=&quot;$(
+  mussel instance show &quot;${instance_id}&quot; \
+  | egrep :address:  \
+  | awk &apos;{print $2}&apos; \
+  | tr &apos;\n&apos; &apos;,&apos;
+)&quot;
+: &quot;${ipaddr:?&quot;should not be empty&quot;}&quot;
+ipaddr=&quot;${ipaddr%%,}&quot;
+echo &quot;${instance_id} ipaddr: ${ipaddr}&quot;
+
+# wait for ssh to be ready
+${SCRIPT_DIR}/instance-wait4ssh.sh  &quot;${instance_id}&quot;
+
+# install package
+${SCRIPT_DIR}/instance-exec.sh      &quot;${instance_id}&quot; &lt; ${SCRIPT_DIR}/provision-imgdb.sh
+
+# instance state: running -&gt; halted
+mussel instance poweroff --force false ${instance_id}
+echo &quot;${instance_id} is halting&quot;
+
+# wait for the instance to be halted
+retry_until [[ &apos;&quot;$(mussel instance show &quot;${instance_id}&quot; | egrep -w &quot;^:state: halted&quot;)&quot;&apos; ]]
+echo &quot;${instance_id} is halted&quot;
+
+# instance backup
+DB_IMAGE_ID=&quot;$(mussel instance backup ${instance_id} --display-name db | egrep ^:image_id: | awk &apos;{print $2}&apos;)&quot;
+echo &quot;database image id: ${DB_IMAGE_ID}&quot;
+
+# wait for the image to be available
+retry_until [[ &apos;&quot;$(mussel image show &quot;${DB_IMAGE_ID}&quot; | egrep -w &quot;^:state: available&quot;)&quot;&apos; ]]
+echo &quot;${DB_IMAGE_ID} is available&quot;
+
+# instance destroy
+mussel instance destroy &quot;${instance_id}&quot;
+echo &quot;${instance_id} is deleted&quot;
+
+## create app image
+
+# app display name
+display_name=&quot;app&quot;
+
+# create an instance
+instance_id=&quot;$(
+  mussel instance create \
+   --cpu-cores    &quot;${cpu_cores}&quot;    \
+   --hypervisor   &quot;${hypervisor}&quot;   \
+   --image-id     &quot;${image_id}&quot;     \
+   --memory-size  &quot;${memory_size}&quot;  \
+   --ssh-key-id   &quot;${ssh_key_id}&quot;   \
+   --vifs         &quot;${vifs}&quot;         \
+   --display-name &quot;${display_name}&quot; \
+  | egrep ^:id: | awk &apos;{print $2}&apos;
+)&quot;
+: &quot;${instance_id:?&quot;should not be empty&quot;}&quot;
+echo &quot;${instance_id} is initializing...&quot;
+
+trap &apos;mussel instance destroy &quot;${instance_id}&quot;&apos; ERR
+
+# wait for the instance to be running
+retry_until [[ &apos;&quot;$(mussel instance show &quot;${instance_id}&quot; | egrep -w &quot;^:state: running&quot;)&quot;&apos; ]]
+echo &quot;${instance_id} is running&quot;
+
+# get instance ipaddr
+ipaddr=&quot;$(
+  mussel instance show &quot;${instance_id}&quot; \
+  | egrep :address:  \
+  | awk &apos;{print $2}&apos; \
+  | tr &apos;\n&apos; &apos;,&apos;
+)&quot;
+: &quot;${ipaddr:?&quot;should not be empty&quot;}&quot;
+ipaddr=&quot;${ipaddr%%,}&quot;
+echo &quot;${instance_id} ipaddr: ${ipaddr}&quot;
+
+# wait for ssh to be ready
+${SCRIPT_DIR}/instance-wait4ssh.sh  &quot;${instance_id}&quot;
+
+# install package
+${SCRIPT_DIR}/instance-exec.sh      &quot;${instance_id}&quot; \
+		    YUM_HOST=&quot;${YUM_HOST}&quot; \
+		    bash -l &lt; ${SCRIPT_DIR}/provision-imgapp.sh
+
+# instance state: running -&gt; halted
+mussel instance poweroff --force false ${instance_id}
+echo &quot;${instance_id} is halting&quot;
+
+# wait for the instance to be halted
+retry_until [[ &apos;&quot;$(mussel instance show &quot;${instance_id}&quot; | egrep -w &quot;^:state: halted&quot;)&quot;&apos; ]]
+echo &quot;${instance_id} is halted&quot;
+
+# instance backup
+APP_IMAGE_ID=&quot;$(mussel instance backup ${instance_id} --display-name app | egrep ^:image_id: | awk &apos;{print $2}&apos;)&quot;
+echo &quot;app image id: ${APP_IMAGE_ID}&quot;
+
+# wait for the image to be available
+RETRY_WAIT_SEC=180 retry_until [[ &apos;&quot;$(mussel image show &quot;${APP_IMAGE_ID}&quot; | egrep -w &quot;^:state: available&quot;)&quot;&apos; ]]
+echo &quot;${DB_IMAGE_ID} is available&quot;
+
+# instance destroy
+mussel instance destroy &quot;${instance_id}&quot;
+echo &quot;${instance_id} is deleted&quot;
+
+echo DB_IMAGE_ID=&quot;${DB_IMAGE_ID}&quot;
+echo APP_IMAGE_ID=&quot;${APP_IMAGE_ID}&quot;
+
+echo &quot;DB_IMAGE_ID=${DB_IMAGE_ID}&quot;   &gt;  ${WRITE_FILE}
+echo &quot;APP_IMAGE_ID=${APP_IMAGE_ID}&quot; &gt;&gt; ${WRITE_FILE}
 </command>
     </hudson.tasks.Shell>
   </builders>

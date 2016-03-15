@@ -1,7 +1,6 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<project>
+<?xml version="1.0" encoding="UTF-8"?><project>
   <actions/>
-  <description></description>
+  <description/>
   <keepDependencies>false</keepDependencies>
   <properties/>
   <scm class="hudson.plugins.git.GitSCM" plugin="git@2.4.2">
@@ -38,11 +37,11 @@ export PATH=$PATH:/opt/axsh/wakame-vdc/client/mussel/bin
 cd ciscripts
 ls -l
 
-ipaddr=&quot;$(&lt; /metadata/meta-data/local-ipv4)&quot;
+ipaddr="$(&lt; /metadata/meta-data/local-ipv4)"
 
-APP_IMAGE_ID=&quot;${APP_IMAGE_ID}&quot; \
- DB_IMAGE_ID=&quot;${DB_IMAGE_ID}&quot; \
-    YUM_HOST=&quot;${ipaddr}&quot; \
+APP_IMAGE_ID="${APP_IMAGE_ID}" \
+ DB_IMAGE_ID="${DB_IMAGE_ID}" \
+    YUM_HOST="${ipaddr}" \
 ./web3layers-ci.sh
 
 echo ${ipaddr}</command>
