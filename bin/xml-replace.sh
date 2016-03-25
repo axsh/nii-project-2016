@@ -13,9 +13,14 @@ reportfailed()
 [ -f "$targetfile" ] || reportfailed "XML file $1 not found"
 
 
-pattern1="*<$elementname/>*"
-pattern1b="*<$elementname>*</$elementname>*"
-pattern2="*<$elementname*"
+# element on one line
+pattern1a="*<$elementname/>*"
+pattern1b="*<$elementname */>*"
+pattern1c="*<$elementname>*</$elementname>*"
+
+# element on multiple line
+pattern2a="*<$elementname>*"
+pattern2b="*<$elementname *"
 endpattern1="*</$elementname>*"
 
 # Current Assumptions:
@@ -31,13 +36,13 @@ exec <"$targetfile.org"
 replacedit=false
 while IFS= read -r ln; do
     case "$ln" in
-	$pattern1 | $pattern1b)
+	$pattern1a | $pattern1b | $pattern1b)
 	    $replacedit && reportfailed "target element $elementname appeared twice"
 	    # just replace this one line
 	    printf "%s\n" "$replacementtext"
 	    replacedit=true
 	;;
-	$pattern2)
+	$pattern2a | $pattern2b)
 	    $replacedit && reportfailed "target element $elementname appeared twice"
 	    # scan until end pattern
 	    foundit=false
