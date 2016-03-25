@@ -36,7 +36,7 @@ exec <"$targetfile.org"
 replacedit=false
 while IFS= read -r ln; do
     case "$ln" in
-	$pattern1a | $pattern1b | $pattern1b)
+	$pattern1a | $pattern1b | $pattern1c)
 	    $replacedit && reportfailed "target element $elementname appeared twice"
 	    # just replace this one line
 	    printf "%s\n" "$replacementtext"
