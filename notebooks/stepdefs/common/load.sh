@@ -17,10 +17,12 @@ function load_config() {
         element_name="${element}"
     fi
 
-    ssh -i /home/centos/mykeypair root@10.0.2.100 <<EOF 2> /dev/null
+    # The sed here preserves end of line backslashes from being stripped by the bash
+    # on the other side of ssh
+    sed 's,\\$,BaCkSlash,g'  <<EOF | ssh -i /home/centos/mykeypair root@10.0.2.100 2> /dev/null
         $(declare -f xml_load_backup)
 
-        value="\$(cat <<"XML_BLOCK"
+        value="\$(sed 's,BaCkSlash,\\\\,g' <<"XML_BLOCK"
 $element_value
 XML_BLOCK
 )"
