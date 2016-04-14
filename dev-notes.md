@@ -8,8 +8,10 @@
    * mussel tutorial notebook.
 
    * translate rpm PDF reference into jupyter
+     * run in 1box or jenkins instance, or another instance?
 
    * translate yum PDF reference into jupyter
+     * run in 1box or jenkins instance, or another instance?
 
    * break integration test into separate jobs
         (web) (deb) (lb) -> three instance start jobs
@@ -28,10 +30,13 @@
       (but what about playing with parameters?)
 
 
+   * Link jobs together and demonstrate before adding scripts.
 
 what is interesting?
 
 automatic! works by itself. "how do we get it to run atomically?"  ans: jenkins! rpm!
+
+tying it all together.
 
 bash techniques.
 
