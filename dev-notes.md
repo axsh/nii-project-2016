@@ -47,3 +47,4 @@ mechanisms behind yum.
 Note: many parts of existing scripts are too complicated for students, unless this
 is a class in obscure bash techniques.
 
+    * Make the reset script remove all machine images
