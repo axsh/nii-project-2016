@@ -46,10 +46,9 @@ function check_param_value() {
     return 0
 }
 
-# Recieves a job name ($1), number of times ($2) the pattern needs to be found
-# and a list of keywords that a line should consist of
-function check_find_line_with() {
-    local job="${1}" ; shift
+# Same as below but without the first parameter (job name).
+# Input is taken from stdin instead of a job's config.xml.
+function check_find_line_with_for_stdin() {
     local passed_check=
     local occurances="${1}" ; shift
     let found=0
@@ -63,8 +62,15 @@ function check_find_line_with() {
             found=$(( $found+1 ))
             [[ $found -eq $occurances ]] && return 0
         }
-    done < /var/lib/jenkins/jobs/${job}/config.xml
+    done
     return 1
+}
+
+# Recieves a job name ($1), number of times ($2) the pattern needs to be found
+# and a list of keywords that a line should consist of
+function check_find_line_with() {
+    local job="${1}" ; shift
+    check_find_line_with_for_stdin "$@" < /var/lib/jenkins/jobs/${job}/config.xml
 }
 
 [[ -f $(dirname $0)/stepdata.conf ]] && . $(dirname $0)/stepdata.conf
