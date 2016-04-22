@@ -1,10 +1,5 @@
 #!/bin/bash
 
-original='\033[0m'
-red='\033[00;31m'
-green='\033[00;32m'
-check_mark="[${green}\xE2\x9C\x93${original}]"
-cross_mark="[${red}\xE2\x9C\x97${original}]"
 sp="-space-"
 
 function check_find_line_with() {
@@ -126,9 +121,11 @@ function check_plugins_exists () {
 #     echo "${lines[@]}"
 # }
 
+. /home/centos/notebooks/stepdefs/jenkins-utility/message.conf
+. /home/centos/notebooks/stepdefs/jenkins-utility/check_message.sh
 [[ -f $(dirname $0)/stepdata.conf ]] && . $(dirname $0)/stepdata.conf
 jenkins_dir="/var/lib/jenkins/"
 job_config="${jenkins_dir}/jobs/${job}/config.xml"
 
-[[ $global_mode == "my-script" ]] && . $(dirname $0)/save.sh
+[[ $global_mode == "my-script" ]] && { [[ -f $(dirname $0)/save.sh ]] && . $(dirname $0)/save.sh ; }
 [[ -f $(dirname $0)/exec.sh ]] && . $(dirname $0)/exec.sh

@@ -9,19 +9,14 @@ set -o pipefail
 
 # check
 
-rpm -ql httpd &gt;/dev/null || sudo yum install -y httpd
+# TASK: Install httpd server
 
-/etc/init.d/httpd status &gt;/dev/null || sudo /etc/init.d/httpd start
+# TASK: Create public directory
 
-# create repo
-REPO_DIR=/var/www/html/pub
-[ -d ${REPO_DIR} ] || sudo mkdir -p ${REPO_DIR}
+# TASK: Publish repo
 
-cd ${HOME}/rpmbuild/RPMS/
-sudo rsync -avx . ${REPO_DIR}/
+# TASK: Build repo
 
-cd ${REPO_DIR}
-
-sudo createrepo .</command>
+</command>
     </hudson.tasks.Shell>
   </builders>
