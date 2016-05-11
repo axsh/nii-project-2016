@@ -73,7 +73,8 @@ EOF
     {
 	erroutput="$(cat "$DATADIR/runinfo/kvm.stderr")"
 	for i in "could not set up host forwarding rule" \
-		     "Failed to bind socket"
+		     "Failed to bind socket" \
+		     "socket bind failed"
 	do
 	    if [[ "$erroutput" == *${i}* ]]; then
 		echo "Failed to bind a socket, probably because it is already in use." 1>&2
