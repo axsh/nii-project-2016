@@ -465,7 +465,7 @@ mkdir notebooks
 echo "c.NotebookApp.notebook_dir = 'notebooks'" >>"$JCFG"
 
 # autostart on boot
-echo "(setsid su - centos -c '/home/centos/anaconda3/bin/jupyter notebook' > /var/log/jupyter.log 2>&1) &" | \
+echo "(setsid su - centos -c '/home/centos/anaconda3/bin/jupyter notebook' >> /var/log/jupyter.log 2>&1) &" | \
    sudo bash -c "cat >>/etc/rc.local"
 
 # We could start jupyter directly now, but let's do a shutdown/boot
