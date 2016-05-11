@@ -446,10 +446,8 @@ EOF
 (
     $starting_step "Set default password for jupyter, plus other easy initial setup"
     JCFG="/home/centos/.jupyter/jupyter_notebook_config.py"
-    [ -x "$DATADIR/vmdir/ssh-to-kvm.sh" ] && {
-	[ -f "$DATADIR/vmdir/1box-openvz-w-jupyter.raw.tar.gz" ] || \
+    [ -x "$DATADIR/vmdir/ssh-to-kvm.sh" ] && \
 	    "$DATADIR/vmdir/ssh-to-kvm.sh" grep sha1 "$JCFG" 2>/dev/null 1>&2
-    }
     $skip_step_if_already_done ; set -e
 
     # http://jupyter-notebook.readthedocs.org/en/latest/public_server.html
@@ -469,5 +467,18 @@ echo "c.NotebookApp.notebook_dir = 'notebooks'" >>"$JCFG"
 # autostart on boot
 echo "(setsid su - centos -c '/home/centos/anaconda3/bin/jupyter notebook' > /var/log/jupyter.log 2>&1) &" | \
    sudo bash -c "cat >>/etc/rc.local"
+
+# We could start jupyter directly now, but let's do a shutdown/boot
+# cycle to test that is working option in case unexpected problems occur.
+# Need to set flag below.
 EOF
+    $reboot1box=true # this flag can also be set before calling ./build-nii.sh
 ) ; prev_cmd_failed
+
+if [ "$reboot1box" != "" ]; then
+    [ -x "$DATADIR/vmdir/kvm-shutdown-via-ssh.sh" ] && \
+	"$DATADIR/vmdir/kvm-shutdown-via-ssh.sh"
+fi
+
+[ -x "$DATADIR/vmdir/kvm-boot.sh" ] && \
+    "$DATADIR/vmdir/kvm-boot.sh"
