@@ -334,14 +334,6 @@ EOF
 ) ; prev_cmd_failed
 
 (
-    $starting_step "Synchronize *all* of notebooks/ to VM, if fullsync=true"
-    [ -x "$DATADIR/vmdir/ssh-to-kvm.sh" ] && [ "$fullsync" != "true" ]
-    $skip_step_if_already_done; set -e
-    
-    "$DATADIR/notebooks-sync.sh" tovm
-) ; prev_cmd_failed
-
-(
     $starting_step "Replace bash_kernel's kernel.py with our version"
     # TODO: make sure this keeps working if the bash_kernel upstream code is updated
     ## e.g., maybe check that md5 of original has not changed, or maybe use patch....
@@ -492,3 +484,11 @@ fi
 
 [ -x "$DATADIR/vmdir/kvm-boot.sh" ] && \
     "$DATADIR/vmdir/kvm-boot.sh"
+
+(
+    $starting_step "Synchronize *all* of notebooks/ to VM, if fullsync=true"
+    [ -x "$DATADIR/vmdir/ssh-to-kvm.sh" ] && [ "$fullsync" != "true" ]
+    $skip_step_if_already_done; set -e
+    
+    "$DATADIR/notebooks-sync.sh" tovm
+) ; prev_cmd_failed
