@@ -472,7 +472,7 @@ echo "(setsid su - centos -c '/home/centos/anaconda3/bin/jupyter notebook' > /va
 # cycle to test that is working option in case unexpected problems occur.
 # Need to set flag below.
 EOF
-    $reboot1box=true # this flag can also be set before calling ./build-nii.sh
+    reboot1box=true # this flag can also be set before calling ./build-nii.sh
 ) ; prev_cmd_failed
 
 if [ "$reboot1box" != "" ]; then
