@@ -472,10 +472,12 @@ echo "(setsid su - centos -c '/home/centos/anaconda3/bin/jupyter notebook' >> /v
 # cycle to test that is working option in case unexpected problems occur.
 # Need to set flag below.
 EOF
-    reboot1box=true # this flag can also be set before calling ./build-nii.sh
+    touch "$DATADIR/reboot1box" # necessary to use a file because inside a subprocess
 ) ; prev_cmd_failed
 
-if [ "$reboot1box" != "" ]; then
+if [ "$reboot1box" != "" ] || \
+       [ -f "$DATADIR/reboot1box" ] ; then  # this flag can also be set before calling ./build-nii.sh
+    rm -f "$DATADIR/reboot1box"
     [ -x "$DATADIR/vmdir/kvm-shutdown-via-ssh.sh" ] && \
 	"$DATADIR/vmdir/kvm-shutdown-via-ssh.sh"
 fi
