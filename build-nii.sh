@@ -487,8 +487,28 @@ fi
 
 (
     $starting_step "Synchronize *all* of notebooks/ to VM, if fullsync=true"
-    [ -x "$DATADIR/vmdir/ssh-to-kvm.sh" ] && [ "$fullsync" != "true" ]
+    [ "$fullsync" != "true" ]
     $skip_step_if_already_done; set -e
     
     "$DATADIR/notebooks-sync.sh" tovm
+) ; prev_cmd_failed
+
+(
+    $starting_step "Synchronize day1 notebooks/ to VM, if day1sync=true"
+    [ "$day1sync" != "true" ]
+    $skip_step_if_already_done; set -e
+    
+    cd "$DATADIR"
+    ./notebooks-sync.sh tovm notebooks/stepdefs  # always sync all stepdefs
+    ./safe-sync-files.sh notebooks/1*
+) ; prev_cmd_failed
+
+(
+    $starting_step "Synchronize day2 notebooks/ to VM, if day2sync=true"
+    [ "$day2sync" != "true" ]
+    $skip_step_if_already_done; set -e
+    
+    cd "$DATADIR"
+    ./notebooks-sync.sh tovm notebooks/stepdefs  # always sync all stepdefs
+    ./safe-sync-files.sh notebooks/2*
 ) ; prev_cmd_failed
