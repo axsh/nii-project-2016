@@ -282,6 +282,45 @@ EOF
 	    ) | "$DATADIR/vmdir/ssh-to-kvm.sh"
 	)
 	
+	(
+	    $starting_group "Install customized machine image into OpenVZ 1box image"
+	    imagefile="centos-6.6.x86_64.openvz.md.raw.tar.gz"
+	    imageid="bo-centos1d64"
+	    ! [ -f "$DATADIR/$imagefile" ]
+	    $skip_group_if_unnecessary
+
+	    (
+		$starting_step "Compute backup object parameters for customized image"
+		[ -f "$DATADIR/$imagefile.params" ]
+
+		$skip_step_if_already_done; set -e
+		"$DATADIR/vmapp-vdc-1box/gen-image-size-params.sh" \
+		    "$DATADIR/$imagefile" >"$DATADIR/$imagefile.params"
+	    ) ; prev_cmd_failed
+
+	    (
+		$starting_step "Install customized image"
+
+		[ -x "$DATADIR/vmdir/ssh-to-kvm.sh" ] &&
+		    "$DATADIR/vmdir/ssh-to-kvm.sh" '[ -d /var/lib/wakame-vdc/images/hide ]' 2>/dev/null
+		$skip_step_if_already_done; set -e
+
+		( cd "$DATADIR" &&
+			tar c "$imagefile" | "$DATADIR/vmdir/ssh-to-kvm.sh" tar xv
+		)
+		"$DATADIR/vmdir/ssh-to-kvm.sh" <<EOF
+set -x
+sudo mkdir -p /var/lib/wakame-vdc/images/hide
+sudo mv /var/lib/wakame-vdc/images/$imagefile /var/lib/wakame-vdc/images/hide
+sudo mv /home/centos/$imagefile /var/lib/wakame-vdc/images
+
+/opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage backupobject modify \
+   $imageid $(cat "$DATADIR/$imagefile.params")
+
+EOF
+	    ) ; prev_cmd_failed
+	)
+
 	# TODO: this guard is awkward.
 	[ -x "$DATADIR/vmdir/kvm-shutdown-via-ssh.sh" ] && \
 	    "$DATADIR/vmdir/kvm-shutdown-via-ssh.sh"
@@ -403,45 +442,6 @@ MMM
 
 EOF
 ) ; prev_cmd_failed
-
-(
-    $starting_group "Install customized machine image into OpenVZ 1box image"
-    imagefile="centos-6.6.x86_64.openvz.md.raw.tar.gz"
-    imageid="bo-centos1d64"
-    ! [ -f "$DATADIR/$imagefile" ]
-    $skip_group_if_unnecessary
-
-    (
-	$starting_step "Compute backup object parameters for customized image"
-	[ -f "$DATADIR/$imagefile.params" ]
-
-	$skip_step_if_already_done; set -e
-	"$DATADIR/vmapp-vdc-1box/gen-image-size-params.sh" \
-	    "$DATADIR/$imagefile" >"$DATADIR/$imagefile.params"
-    ) ; prev_cmd_failed
-
-    (
-	$starting_step "Install customized image"
-
-	[ -x "$DATADIR/vmdir/ssh-to-kvm.sh" ] &&
-	    "$DATADIR/vmdir/ssh-to-kvm.sh" '[ -d /var/lib/wakame-vdc/images/hide ]' 2>/dev/null
-	$skip_step_if_already_done; set -e
-
-	( cd "$DATADIR" &&
-		tar c "$imagefile" | "$DATADIR/vmdir/ssh-to-kvm.sh" tar xv
-	)
-	"$DATADIR/vmdir/ssh-to-kvm.sh" <<EOF
-set -x
-sudo mkdir -p /var/lib/wakame-vdc/images/hide
-sudo mv /var/lib/wakame-vdc/images/$imagefile /var/lib/wakame-vdc/images/hide
-sudo mv /home/centos/$imagefile /var/lib/wakame-vdc/images
-
-/opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage backupobject modify \
-   $imageid $(cat "$DATADIR/$imagefile.params")
-
-EOF
-    ) ; prev_cmd_failed
-)
 
 (
     $starting_step "Set default password for jupyter, plus other easy initial setup"
