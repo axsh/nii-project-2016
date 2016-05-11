@@ -406,6 +406,35 @@ EOF
 ) ; prev_cmd_failed
 
 (
+    $starting_step "Removed demo2 through demo8 and minimum from launch instance"
+
+    [ -x "$DATADIR/vmdir/ssh-to-kvm.sh" ] &&
+	"$DATADIR/vmdir/ssh-to-kvm.sh" <<'CCC' 2>/dev/null
+          r="$(mysql -u root wakame_dcmgr <<MMM
+select display_name from networks ;
+MMM
+)"
+[[ "$r" != *demo3* ]]
+CCC
+    $skip_step_if_already_done; set -e
+
+    "$DATADIR/vmdir/ssh-to-kvm.sh" <<EOF
+set -x
+        mysql -u root wakame_dcmgr <<MMM
+DELETE FROM networks WHERE display_name="demo2" ;
+DELETE FROM networks WHERE display_name="demo3" ;
+DELETE FROM networks WHERE display_name="demo4" ;
+DELETE FROM networks WHERE display_name="demo5" ;
+DELETE FROM networks WHERE display_name="demo6" ;
+DELETE FROM networks WHERE display_name="demo7" ;
+DELETE FROM networks WHERE display_name="demo8" ;
+DELETE FROM networks WHERE display_name="minimum" ;
+MMM
+
+EOF
+) ; prev_cmd_failed
+
+(
     $starting_group "Install customized machine image into OpenVZ 1box image"
     imagefile="centos-6.6.x86_64.openvz.md.raw.tar.gz"
     imageid="bo-centos1d64"
@@ -439,35 +468,6 @@ sudo mv /home/centos/$imagefile /var/lib/wakame-vdc/images
 
 /opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage backupobject modify \
    $imageid $(cat "$DATADIR/$imagefile.params")
-
-EOF
-    ) ; prev_cmd_failed
-
-    (
-	$starting_step "Removed demo2 through demo8 and minimum from launch instance"
-
-	[ -x "$DATADIR/vmdir/ssh-to-kvm.sh" ] &&
-	    "$DATADIR/vmdir/ssh-to-kvm.sh" <<'CCC' 2>/dev/null
-          r="$(mysql -u root wakame_dcmgr <<MMM
-select display_name from networks ;
-MMM
-)"
-[[ "$r" != *demo3* ]]
-CCC
-	$skip_step_if_already_done; set -e
-
-	"$DATADIR/vmdir/ssh-to-kvm.sh" <<EOF
-set -x
-        mysql -u root wakame_dcmgr <<MMM
-DELETE FROM networks WHERE display_name="demo2" ;
-DELETE FROM networks WHERE display_name="demo3" ;
-DELETE FROM networks WHERE display_name="demo4" ;
-DELETE FROM networks WHERE display_name="demo5" ;
-DELETE FROM networks WHERE display_name="demo6" ;
-DELETE FROM networks WHERE display_name="demo7" ;
-DELETE FROM networks WHERE display_name="demo8" ;
-DELETE FROM networks WHERE display_name="minimum" ;
-MMM
 
 EOF
     ) ; prev_cmd_failed
