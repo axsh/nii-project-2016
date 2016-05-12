@@ -13,7 +13,7 @@ if [ "$DATADIR" = "" ]; then
     # Choose directory of symbolic link by default
     DATADIR="$CODEDIR"
 fi
-source "$ORGCODEDIR/../simple-defaults-for-bashsteps.source"
+source "$ORGCODEDIR/simple-defaults-for-bashsteps.source"
 source "$DATADIR/datadir.conf"
 [ -d "$DATADIR/runinfo" ] || mkdir "$DATADIR/runinfo"
 : ${KVMMEM:=1024}
@@ -115,7 +115,7 @@ EOF
 		kpat=( $(build-cmd-line) )
 		# Using /dev/null in the next line so that ssh will exit when used to call
 		# this script.  Otherwise, the open stdout and stderr will keep ssh connected.
-		setsid "$ORGCODEDIR/../monitor-process.sh" runinfo/kvm "${kpat[@]}" 1>/dev/null 2>&1 &
+		setsid "$ORGCODEDIR/monitor-process.sh" runinfo/kvm "${kpat[@]}" 1>/dev/null 2>&1 &
 	    )
 	    for s in ${kvmearlychecks:=1 1 1 1 1} ; do # check early errors for 5 seconds
 		sleep "$s"
