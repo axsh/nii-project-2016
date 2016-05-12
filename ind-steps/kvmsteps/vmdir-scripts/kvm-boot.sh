@@ -113,7 +113,9 @@ EOF
 	    repeat=false
 	    ( # using a temporary subprocess to supress job control messages
 		kpat=( $(build-cmd-line) )
-		setsid "$ORGCODEDIR/../monitor-process.sh" runinfo/kvm "${kpat[@]}" &
+		# Using /dev/null in the next line so that ssh will exit when used to call
+		# this script.  Otherwise, the open stdout and stderr will keep ssh connected.
+		setsid "$ORGCODEDIR/../monitor-process.sh" runinfo/kvm "${kpat[@]}" 1>/dev/null 2>&1 &
 	    )
 	    for s in ${kvmearlychecks:=1 1 1 1 1} ; do # check early errors for 5 seconds
 		sleep "$s"
