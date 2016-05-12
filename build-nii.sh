@@ -143,36 +143,6 @@ EOF
 	    ) ; prev_cmd_failed
 	done
 
-	(
-	    $starting_step "Set default password for jupyter, plus other easy initial setup"
-	    JCFG="/home/centos/.jupyter/jupyter_notebook_config.py"
-	    [ -x "$DATADIR/vmdir/ssh-to-kvm.sh" ] && {
-		[ -f "$DATADIR/vmdir/1box-openvz-w-jupyter.raw.tar.gz" ] || \
-		    "$DATADIR/vmdir/ssh-to-kvm.sh" grep sha1 "$JCFG" 2>/dev/null 1>&2
-	    }
-	    $skip_step_if_already_done ; set -e
-
-	    # http://jupyter-notebook.readthedocs.org/en/latest/public_server.html
-	    "$DATADIR/vmdir/ssh-to-kvm.sh" <<EOF
-set -x
-[ -f "$JCFG" ] || jupyter notebook --generate-config
-
-# set default password
-saltpass="\$(echo $'from notebook.auth import passwd\nprint(passwd("${JUPYTER_PASSWORD:=warmwinter}"))' | python)"
-echo "c.NotebookApp.password = '\$saltpass'" >>"$JCFG"
-echo "c.NotebookApp.ip = '*'" >>"$JCFG"
-
-# move jupyter's default directory away from \$HOME
-mkdir notebooks
-echo "c.NotebookApp.notebook_dir = 'notebooks'" >>"$JCFG"
-
-# autostart on boot
-echo "(setsid su - centos -c '/home/centos/anaconda3/bin/jupyter notebook' > /var/log/jupyter.log 2>&1) &" | \
-   sudo bash -c "cat >>/etc/rc.local"
-EOF
-	) ; prev_cmd_failed
-
-
 	# function is called remotely in the next step below
 	do_register_keypair()
 	{
@@ -312,6 +282,45 @@ EOF
 	    ) | "$DATADIR/vmdir/ssh-to-kvm.sh"
 	)
 	
+	(
+	    $starting_group "Install customized machine image into OpenVZ 1box image"
+	    imagefile="centos-6.6.x86_64.openvz.md.raw.tar.gz"
+	    imageid="bo-centos1d64"
+	    ! [ -f "$DATADIR/$imagefile" ]
+	    $skip_group_if_unnecessary
+
+	    (
+		$starting_step "Compute backup object parameters for customized image"
+		[ -f "$DATADIR/$imagefile.params" ]
+
+		$skip_step_if_already_done; set -e
+		"$DATADIR/vmapp-vdc-1box/gen-image-size-params.sh" \
+		    "$DATADIR/$imagefile" >"$DATADIR/$imagefile.params"
+	    ) ; prev_cmd_failed
+
+	    (
+		$starting_step "Install customized image"
+
+		[ -x "$DATADIR/vmdir/ssh-to-kvm.sh" ] &&
+		    "$DATADIR/vmdir/ssh-to-kvm.sh" '[ -d /var/lib/wakame-vdc/images/hide ]' 2>/dev/null
+		$skip_step_if_already_done; set -e
+
+		( cd "$DATADIR" &&
+			tar c "$imagefile" | "$DATADIR/vmdir/ssh-to-kvm.sh" tar xv
+		)
+		"$DATADIR/vmdir/ssh-to-kvm.sh" <<EOF
+set -x
+sudo mkdir -p /var/lib/wakame-vdc/images/hide
+sudo mv /var/lib/wakame-vdc/images/$imagefile /var/lib/wakame-vdc/images/hide
+sudo mv /home/centos/$imagefile /var/lib/wakame-vdc/images
+
+/opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage backupobject modify \
+   $imageid $(cat "$DATADIR/$imagefile.params")
+
+EOF
+	    ) ; prev_cmd_failed
+	)
+
 	# TODO: this guard is awkward.
 	[ -x "$DATADIR/vmdir/kvm-shutdown-via-ssh.sh" ] && \
 	    "$DATADIR/vmdir/kvm-shutdown-via-ssh.sh"
@@ -353,14 +362,14 @@ EOF
 ) ; prev_cmd_failed
 
 (
-    $starting_step "Synchronize notebooks/ to VM"
+    $starting_step "Synchronize bin/ and notebooks/.downloads to VM"
     [ -x "$DATADIR/vmdir/ssh-to-kvm.sh" ] && {
-	"$DATADIR/vmdir/ssh-to-kvm.sh" '[ "$(ls notebooks)" != "" ]' 2>/dev/null
+	"$DATADIR/vmdir/ssh-to-kvm.sh" '[ "$(ls bin)" != "" ]' 2>/dev/null
     }
     $skip_step_if_already_done; set -e
-
+    
     "$DATADIR/notebooks-sync.sh" tovm bin
-    "$DATADIR/notebooks-sync.sh" tovm
+    "$DATADIR/notebooks-sync.sh" tovm notebooks/.downloads
 ) ; prev_cmd_failed
 
 (
@@ -406,57 +415,19 @@ EOF
 ) ; prev_cmd_failed
 
 (
-    $starting_group "Install customized machine image into OpenVZ 1box image"
-    imagefile="centos-6.6.x86_64.openvz.md.raw.tar.gz"
-    imageid="bo-centos1d64"
-    ! [ -f "$DATADIR/$imagefile" ]
-    $skip_group_if_unnecessary
+    $starting_step "Removed demo2 through demo8 and minimum from launch instance"
 
-    (
-	$starting_step "Compute backup object parameters for customized image"
-	[ -f "$DATADIR/$imagefile.params" ]
-
-	$skip_step_if_already_done; set -e
-	"$DATADIR/vmapp-vdc-1box/gen-image-size-params.sh" \
-	    "$DATADIR/$imagefile" >"$DATADIR/$imagefile.params"
-    ) ; prev_cmd_failed
-
-    (
-	$starting_step "Install customized image"
-
-	[ -x "$DATADIR/vmdir/ssh-to-kvm.sh" ] &&
-	    "$DATADIR/vmdir/ssh-to-kvm.sh" '[ -d /var/lib/wakame-vdc/images/hide ]' 2>/dev/null
-	$skip_step_if_already_done; set -e
-
-	( cd "$DATADIR" &&
-		tar c "$imagefile" | "$DATADIR/vmdir/ssh-to-kvm.sh" tar xv
-	)
-	"$DATADIR/vmdir/ssh-to-kvm.sh" <<EOF
-set -x
-sudo mkdir -p /var/lib/wakame-vdc/images/hide
-sudo mv /var/lib/wakame-vdc/images/$imagefile /var/lib/wakame-vdc/images/hide
-sudo mv /home/centos/$imagefile /var/lib/wakame-vdc/images
-
-/opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage backupobject modify \
-   $imageid $(cat "$DATADIR/$imagefile.params")
-
-EOF
-    ) ; prev_cmd_failed
-
-    (
-	$starting_step "Removed demo2 through demo8 and minimum from launch instance"
-
-	[ -x "$DATADIR/vmdir/ssh-to-kvm.sh" ] &&
-	    "$DATADIR/vmdir/ssh-to-kvm.sh" <<'CCC' 2>/dev/null
+    [ -x "$DATADIR/vmdir/ssh-to-kvm.sh" ] &&
+	"$DATADIR/vmdir/ssh-to-kvm.sh" <<'CCC' 2>/dev/null
           r="$(mysql -u root wakame_dcmgr <<MMM
 select display_name from networks ;
 MMM
 )"
 [[ "$r" != *demo3* ]]
 CCC
-	$skip_step_if_already_done; set -e
+    $skip_step_if_already_done; set -e
 
-	"$DATADIR/vmdir/ssh-to-kvm.sh" <<EOF
+    "$DATADIR/vmdir/ssh-to-kvm.sh" <<EOF
 set -x
         mysql -u root wakame_dcmgr <<MMM
 DELETE FROM networks WHERE display_name="demo2" ;
@@ -470,5 +441,74 @@ DELETE FROM networks WHERE display_name="minimum" ;
 MMM
 
 EOF
-    ) ; prev_cmd_failed
-)
+) ; prev_cmd_failed
+
+(
+    $starting_step "Set default password for jupyter, plus other easy initial setup"
+    JCFG="/home/centos/.jupyter/jupyter_notebook_config.py"
+    [ -x "$DATADIR/vmdir/ssh-to-kvm.sh" ] && \
+	    "$DATADIR/vmdir/ssh-to-kvm.sh" grep sha1 "$JCFG" 2>/dev/null 1>&2
+    $skip_step_if_already_done ; set -e
+
+    # http://jupyter-notebook.readthedocs.org/en/latest/public_server.html
+    "$DATADIR/vmdir/ssh-to-kvm.sh" <<EOF
+set -x
+[ -f "$JCFG" ] || jupyter notebook --generate-config
+
+# set default password
+saltpass="\$(echo $'from notebook.auth import passwd\nprint(passwd("${JUPYTER_PASSWORD:=warmwinter}"))' | python)"
+echo "c.NotebookApp.password = '\$saltpass'" >>"$JCFG"
+echo "c.NotebookApp.ip = '*'" >>"$JCFG"
+
+# move jupyter's default directory away from \$HOME
+mkdir notebooks
+echo "c.NotebookApp.notebook_dir = 'notebooks'" >>"$JCFG"
+
+# autostart on boot
+echo "(setsid su - centos -c '/home/centos/anaconda3/bin/jupyter notebook' >> /var/log/jupyter.log 2>&1) &" | \
+   sudo bash -c "cat >>/etc/rc.local"
+
+# We could start jupyter directly now, but let's do a shutdown/boot
+# cycle to test that is working option in case unexpected problems occur.
+# Need to set flag below.
+EOF
+    touch "$DATADIR/reboot1box" # necessary to use a file because inside a subprocess
+) ; prev_cmd_failed
+
+if [ "$reboot1box" != "" ] || \
+       [ -f "$DATADIR/reboot1box" ] ; then  # this flag can also be set before calling ./build-nii.sh
+    rm -f "$DATADIR/reboot1box"
+    [ -x "$DATADIR/vmdir/kvm-shutdown-via-ssh.sh" ] && \
+	"$DATADIR/vmdir/kvm-shutdown-via-ssh.sh"
+fi
+
+[ -x "$DATADIR/vmdir/kvm-boot.sh" ] && \
+    "$DATADIR/vmdir/kvm-boot.sh"
+
+(
+    $starting_step "Synchronize *all* of notebooks/ to VM, if fullsync=true"
+    [ "$fullsync" != "true" ]
+    $skip_step_if_already_done; set -e
+    
+    "$DATADIR/notebooks-sync.sh" tovm
+) ; prev_cmd_failed
+
+(
+    $starting_step "Synchronize day1 notebooks/ to VM, if day1sync=true"
+    [ "$day1sync" != "true" ]
+    $skip_step_if_already_done; set -e
+    
+    cd "$DATADIR"
+    ./notebooks-sync.sh tovm notebooks/stepdefs  # always sync all stepdefs
+    ./safe-sync-files.sh notebooks/1*
+) ; prev_cmd_failed
+
+(
+    $starting_step "Synchronize day2 notebooks/ to VM, if day2sync=true"
+    [ "$day2sync" != "true" ]
+    $skip_step_if_already_done; set -e
+    
+    cd "$DATADIR"
+    ./notebooks-sync.sh tovm notebooks/stepdefs  # always sync all stepdefs
+    ./safe-sync-files.sh notebooks/2*
+) ; prev_cmd_failed

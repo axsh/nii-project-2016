@@ -13,7 +13,7 @@ if [ "$DATADIR" = "" ]; then
     # Choose directory of symbolic link by default
     DATADIR="$CODEDIR"
 fi
-source "$ORGCODEDIR/../simple-defaults-for-bashsteps.source"
+source "$ORGCODEDIR/simple-defaults-for-bashsteps.source"
 source "$DATADIR/datadir.conf"
 [ -d "$DATADIR/runinfo" ] || mkdir "$DATADIR/runinfo"
 : ${KVMMEM:=1024}
@@ -73,7 +73,8 @@ EOF
     {
 	erroutput="$(cat "$DATADIR/runinfo/kvm.stderr")"
 	for i in "could not set up host forwarding rule" \
-		     "Failed to bind socket"
+		     "Failed to bind socket" \
+		     "socket bind failed"
 	do
 	    if [[ "$erroutput" == *${i}* ]]; then
 		echo "Failed to bind a socket, probably because it is already in use." 1>&2
@@ -112,7 +113,9 @@ EOF
 	    repeat=false
 	    ( # using a temporary subprocess to supress job control messages
 		kpat=( $(build-cmd-line) )
-		setsid "$ORGCODEDIR/../monitor-process.sh" runinfo/kvm "${kpat[@]}" &
+		# Using /dev/null in the next line so that ssh will exit when used to call
+		# this script.  Otherwise, the open stdout and stderr will keep ssh connected.
+		setsid "$ORGCODEDIR/monitor-process.sh" runinfo/kvm "${kpat[@]}" 1>/dev/null 2>&1 &
 	    )
 	    for s in ${kvmearlychecks:=1 1 1 1 1} ; do # check early errors for 5 seconds
 		sleep "$s"
