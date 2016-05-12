@@ -60,5 +60,8 @@ source "$DATADIR/datadir.conf" 2>/dev/null
     $starting_step "Copy control scripts to VM directory"
     [ -f "$DATADIR/kvm-boot.sh" ]
     $skip_step_if_already_done
-    ln -s "$ORGCODEDIR/vmdir-scripts"/* "$DATADIR"
+    #ln -s "$ORGCODEDIR/vmdir-scripts"/* "$DATADIR"
+    # Stopped using links so that the VM dir can be copied
+    # to different machines
+    cp -a "$ORGCODEDIR/vmdir-scripts"/* "$DATADIR"
 )
