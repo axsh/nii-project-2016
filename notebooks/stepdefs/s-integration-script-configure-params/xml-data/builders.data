@@ -1,0 +1,64 @@
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+#
+#
+set -e
+set -o pipefail
+set -u
+
+# Task: Use parameters recieved from imagebuild
+DB_IMAGE_ID=${DB_IMAGE_ID}
+APP_IMAGE_ID=${APP_IMAGE)ID}
+
+# required shell params
+
+SCRIPT_DIR=&quot;${WORKSPACE}/ciscripts/wakame-vdc&quot;
+YUM_HOST=&quot;$(&lt; /metadata/meta-data/local-ipv4)&quot;
+: &quot;${DB_IMAGE_ID:?&quot;should not be empty&quot;}&quot;
+: &quot;${APP_IMAGE_ID:?&quot;should not be empty&quot;}&quot;
+
+cd ${SCRIPT_DIR}
+
+# setup instances
+
+eval &quot;$(
+ IMAGE_ID=&quot;${DB_IMAGE_ID}&quot; \
+  ${SCRIPT_DIR}/setup-db.sh
+)&quot;
+
+eval &quot;$(
+ IMAGE_ID=&quot;${APP_IMAGE_ID}&quot; \
+  YUM_HOST=&quot;${YUM_HOST}&quot; DB_HOST=&quot;${DB_HOST}&quot; \
+  ${SCRIPT_DIR}/setup-app.sh
+)&quot;
+
+eval &quot;$(
+  APP_ID=&quot;${APP_ID}&quot; \
+  ${SCRIPT_DIR}/setup-lbweb.sh
+)&quot;
+
+# cleanup
+
+trap &apos;
+ mussel instance destroy &quot;${DB_ID}&quot;
+ mussel instance destroy &quot;${APP_ID}&quot;
+ ${SCRIPT_DIR}/load_balancer-kill.sh &quot;${LDWEB_ID}&quot;
+&apos; ERR EXIT
+
+
+cd ${WORKSPACE}/spec_integration
+
+# Task: Install gems
+
+cp config/webapi.conf.example config/webapi.conf
+
+if [[ -n &quot;${APP_HOST:-&quot;&quot;}&quot; ]]; then
+  sed -i s,localhost,${APP_HOST}, config/webapi.conf
+fi
+
+# Task: Execute integration test
+
+      </command>
+    </hudson.tasks.Shell>
+  </builders>
