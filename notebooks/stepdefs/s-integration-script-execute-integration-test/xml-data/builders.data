@@ -9,7 +9,7 @@ set -u
 
 # Task: Use parameters recieved from imagebuild
 DB_IMAGE_ID=${DB_IMAGE_ID}
-APP_IMAGE_ID=${APP_IMAGE)ID}
+APP_IMAGE_ID=${APP_IMAGE_ID}
 
 # required shell params
 
