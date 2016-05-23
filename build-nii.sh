@@ -415,19 +415,29 @@ EOF
 ) ; prev_cmd_failed
 
 (
-    $starting_step "Removed demo2 through demo8 and minimum from launch instance"
+    $starting_group "Hide unused steps"
 
-    [ -x "$DATADIR/vmdir/ssh-to-kvm.sh" ] &&
-	"$DATADIR/vmdir/ssh-to-kvm.sh" <<'CCC' 2>/dev/null
+    ## This step is removed from the build because it caused trouble
+    ## with the load balancer.  Instead of removing it, I am blocking
+    ## its execution with a group so that it can still be forced to
+    ## execute (using the bashctrl.sh wrapper script) for some
+    ## anticipated debugging/testing work.
+    true
+    $skip_group_if_unnecessary
+    (
+	$starting_step "Removed demo2 through demo8 and minimum from launch instance"
+
+	[ -x "$DATADIR/vmdir/ssh-to-kvm.sh" ] &&
+	    "$DATADIR/vmdir/ssh-to-kvm.sh" <<'CCC' 2>/dev/null
           r="$(mysql -u root wakame_dcmgr <<MMM
 select display_name from networks ;
 MMM
 )"
 [[ "$r" != *demo3* ]]
 CCC
-    $skip_step_if_already_done; set -e
+	$skip_step_if_already_done; set -e
 
-    "$DATADIR/vmdir/ssh-to-kvm.sh" <<EOF
+	"$DATADIR/vmdir/ssh-to-kvm.sh" <<EOF
 set -x
         mysql -u root wakame_dcmgr <<MMM
 DELETE FROM networks WHERE display_name="demo2" ;
@@ -441,7 +451,8 @@ DELETE FROM networks WHERE display_name="minimum" ;
 MMM
 
 EOF
-) ; prev_cmd_failed
+    ) ; prev_cmd_failed
+)
 
 (
     $starting_step "Set default password for jupyter, plus other easy initial setup"
