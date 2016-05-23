@@ -452,7 +452,7 @@ MMM
 
 EOF
     ) ; prev_cmd_failed
-)
+) ; prev_cmd_failed
 
 (
     $starting_step "Set default password for jupyter, plus other easy initial setup"
