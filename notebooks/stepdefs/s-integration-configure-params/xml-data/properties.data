@@ -1,0 +1,16 @@
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>APP_IMAGE_ID</name>
+          <description></description>
+          <defaultValue>wmi-app-image-id</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>DB_IMAGE_ID</name>
+          <description></description>
+          <defaultValue>wii-db-image-id</defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
