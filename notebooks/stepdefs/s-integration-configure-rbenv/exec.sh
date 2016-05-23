@@ -6,14 +6,5 @@ test2_passed=false
 check_find_line_with "version" "2.0.0-p598" <<< "$output" && test1_passed=true
 check_find_line_with "gem__list" "bundler" "rake" <<< "$output" && test2_passed=true
 
-if $test1_passed ; then
-    echo "Version: Passed"
-else
-    echo "Check [ failed ]"
-fi
-
-if $test2_passed ; then
-    echo "Gems: Passed"
-else
-    echo "Check [ failed ]"
-fi
+check_message $test1_passed "$rbenv_version_status"
+check_message $test2_passed "$rbenv_gems_status"

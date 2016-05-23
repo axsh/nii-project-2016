@@ -6,14 +6,5 @@ test2_passed=false
 check_param_value notificationType "SUCCESS STARTED FAILURE" <<< "$output" && test1_passed=true
 $test1_passed && ! check_param_value notifyEnabled "false" "$output" <<< "$output" && test2_passed=true
 
-if $test1_passed ; then 
-    echo "Added notifications: Passed"
-else
-    echo "Check [ fail ]"
-fi
-
-if $test2_passed ; then
-    echo "Enabled notifications: Passed"
-else
-    echo "Check [ fail ]"
-fi
+check_message $test1_passed "$hipchat_notifications_status"
+check_message $test2_passed "$hipchat_notifiyEnabled_status"
