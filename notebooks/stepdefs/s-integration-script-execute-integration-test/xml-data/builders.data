@@ -7,6 +7,8 @@ set -e
 set -o pipefail
 set -u
 
+export PATH=${PATH}:/opt/axsh/wakame-vdc/client/mussel/bin/
+
 # Task: Use parameters recieved from imagebuild
 DB_IMAGE_ID=${DB_IMAGE_ID}
 APP_IMAGE_ID=${APP_IMAGE_ID}
