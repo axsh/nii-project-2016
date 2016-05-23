@@ -4,8 +4,4 @@ test_passed=false
 
 check_not_empty "${output}" url <<< "$output" && test_passed=true
 
-if $test_passed  ; then
-    echo "Check [ ok ]"
-else
-    echo "Check [ fail ]"
-fi
+check_message $test_passed "$git_repo_status"
