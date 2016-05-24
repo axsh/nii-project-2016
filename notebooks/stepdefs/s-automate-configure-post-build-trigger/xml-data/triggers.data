@@ -1,0 +1,6 @@
+  <triggers>
+    <hudson.triggers.SCMTrigger>
+      <spec>*/5 * * * *</spec>
+      <ignorePostCommitHooks>false</ignorePostCommitHooks>
+    </hudson.triggers.SCMTrigger>
+  </triggers>
