@@ -5,6 +5,15 @@
 . $(dirname $0)/stepdata.conf
 . /home/centos/notebooks/stepdefs/jenkins-utility/xml-utility.sh
 
+function incremental_log() {
+    local filename="${1}"
+    let cnt=0
+    while [[ -f "$filename-${cnt}" ]] ; do
+	cnt=$(( cnt + 1 ))
+    done
+    cp ${filename} ${filename}-${cnt}
+}
+
 function save_config() {
     local file="/var/lib/jenkins/jobs/${job}/config.xml"
     local xpath="${1}" element_name="${xpath##*/}" base_node="${2}"
@@ -15,8 +24,10 @@ function save_config() {
 EOF
     if [[ ! -z $base_node ]] ; then
         scp -i /home/centos/mykeypair root@10.0.2.100:/tmp/"${element_name}".data-student $(dirname $0)/xml-data/"${2}".data-student &> /dev/null
+        incremental_log $(dirname $0)/xml-data/"${2}".data-student
     else
         scp -i /home/centos/mykeypair root@10.0.2.100:/tmp/"${element_name}".data-student $(dirname $0)/xml-data/ &> /dev/null
+        incremental_log $(dirname $0)/xml-data/"${element_name}".data-student
     fi
 }
 
