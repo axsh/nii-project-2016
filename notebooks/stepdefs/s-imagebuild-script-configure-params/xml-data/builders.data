@@ -28,7 +28,6 @@ vifs=vifs.json
 cpu_cores=&quot;1&quot;
 hypervisor=&quot;openvz&quot;
 memory_size=&quot;512&quot;
-image_id=&quot;${IMAGE_ID}&quot;
 ssh_key_id=&quot;ssh-cicddemo&quot;
 
 # create an musselrc
@@ -53,7 +52,7 @@ instance_id=&quot;$(
   mussel instance create \
   --cpu-cores    &quot;${cpu_cores}&quot;    \
   --hypervisor   &quot;${hypervisor}&quot;   \
-  --image-id     &quot;${image_id}&quot;     \
+  --image-id     &quot;${IMAGE_ID}&quot;     \
   --memory-size  &quot;${memory_size}&quot;  \
   --ssh-key-id   &quot;${ssh_key_id}&quot;   \
   --vifs         &quot;${vifs}&quot;         \
@@ -117,7 +116,7 @@ instance_id=&quot;$(
   mussel instance create \
    --cpu-cores    &quot;${cpu_cores}&quot;    \
    --hypervisor   &quot;${hypervisor}&quot;   \
-   --image-id     &quot;${image_id}&quot;     \
+   --image-id     &quot;${IMAGE_ID}&quot;     \
    --memory-size  &quot;${memory_size}&quot;  \
    --ssh-key-id   &quot;${ssh_key_id}&quot;   \
    --vifs         &quot;${vifs}&quot;         \
