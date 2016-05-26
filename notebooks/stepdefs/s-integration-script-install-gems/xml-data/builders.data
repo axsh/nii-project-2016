@@ -9,10 +9,6 @@ set -u
 
 export PATH=${PATH}:/opt/axsh/wakame-vdc/client/mussel/bin/
 
-# Task: Use parameters recieved from imagebuild
-DB_IMAGE_ID=${DB_IMAGE_ID}
-APP_IMAGE_ID=${APP_IMAGE_ID}
-
 # required shell params
 
 SCRIPT_DIR=&quot;${WORKSPACE}/ciscripts/wakame-vdc&quot;
