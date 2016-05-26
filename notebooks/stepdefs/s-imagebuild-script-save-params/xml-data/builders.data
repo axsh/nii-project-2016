@@ -100,7 +100,7 @@ DB_IMAGE_ID=&quot;$(mussel instance backup ${instance_id} --display-name db | eg
 echo &quot;database image id: ${DB_IMAGE_ID}&quot;
 
 # wait for the image to be available
-retry_until [[ &apos;&quot;$(mussel image show &quot;${DB_IMAGE_ID}&quot; | egrep -w &quot;^:state: available&quot;)&quot;&apos; ]]
+RETRY_WAIT_SEC=300 retry_until [[ &apos;&quot;$(mussel image show &quot;${DB_IMAGE_ID}&quot; | egrep -w &quot;^:state: available&quot;)&quot;&apos; ]]
 echo &quot;${DB_IMAGE_ID} is available&quot;
 
 # instance destroy
@@ -165,7 +165,7 @@ APP_IMAGE_ID=&quot;$(mussel instance backup ${instance_id} --display-name app | 
 echo &quot;app image id: ${APP_IMAGE_ID}&quot;
 
 # wait for the image to be available
-RETRY_WAIT_SEC=180 retry_until [[ &apos;&quot;$(mussel image show &quot;${APP_IMAGE_ID}&quot; | egrep -w &quot;^:state: available&quot;)&quot;&apos; ]]
+RETRY_WAIT_SEC=300 retry_until [[ &apos;&quot;$(mussel image show &quot;${APP_IMAGE_ID}&quot; | egrep -w &quot;^:state: available&quot;)&quot;&apos; ]]
 echo &quot;${DB_IMAGE_ID} is available&quot;
 
 # instance destroy
