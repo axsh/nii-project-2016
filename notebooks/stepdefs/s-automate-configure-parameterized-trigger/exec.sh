@@ -9,5 +9,5 @@ check_param_value condition "SUCCESS" <<< "$output" && test2_passed=true
 check_param_value propertiesFile "\${WORKSPACE}/\${BUILD_TAG}" <<< "$output" && test3_passed=true
 
 check_message $test1_passed "Triggers tiny_web.integration"
-check_message $test3_passed "Triggers on success only"
-check_message $test2_passed "Saves parameters into \${WORKSPACE}/\${BUILD_TAG}"
+check_message $test2_passed "Triggers on success only"
+check_message $test3_passed "Saves parameters into \${WORKSPACE}/\${BUILD_TAG}"
