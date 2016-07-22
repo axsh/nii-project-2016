@@ -23,7 +23,7 @@ function save_config() {
         xml_save_backup "${file}" "${element_name}" "${xpath}"
 EOF
     scp -i /home/centos/mykeypair root@10.0.2.100:/tmp/"${element_name}".data-student $(dirname $0)/xml-data/"${base_element}".data-student &> /dev/null
-    [[ -f $(dirname $0)/xml-data/"${base_element}".data-student ]] || echo "[WARNING] Expected configuration data not found." ; return 1
+    [[ -f $(dirname $0)/xml-data/"${base_element}".data-student ]] || { echo "[WARNING] Expected configuration data not found." ; return 1 ; }
     incremental_log $(dirname $0)/xml-data/"${base_element}".data-student
 }
 
