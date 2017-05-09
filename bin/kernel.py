@@ -3,15 +3,12 @@ from pexpect import replwrap, EOF
 import pexpect
 
 from subprocess import check_output
-from os import path
+import os.path
 
-import base64
-import imghdr
 import re
 import signal
-import urllib
 
-__version__ = '0.2'
+__version__ = '0.6'
 
 version_pat = re.compile(r'version (\d+(\.\d+)+)')
 
@@ -19,35 +16,36 @@ from .images import (
     extract_image_filenames, display_data_for_image, image_setup_cmd
 )
 
-# An attempt was made to make this subclass for incremental output
-# work for the latest pexpect (ver 4.1), as well as pexpect version
-# 3.3, which gets installed when using the Anaconda installation
-# method that is recommended on the Jupyter installation page.
 class IREPLWrapper(replwrap.REPLWrapper):
+    """A subclass of REPLWrapper that gives incremental output
+    specifically for bash_kernel.
+
+    The parameters are the same as for REPLWrapper, except for one
+    extra parameter:
+
+    :param line_output_callback: a callback method to receive each batch
+      of incremental output. It takes one string parameter.
+    """
     def __init__(self, cmd_or_spawn, orig_prompt, prompt_change,
-                 extra_init_cmd=None, bkernel=None):
-        self.bkernel = bkernel
-        replwrap.REPLWrapper.__init__(self, cmd_or_spawn, orig_prompt, prompt_change)
-        # extra_init_cmd can be passed in to REPLWrapper.__init__, however
-        # that parameter is not supported in older versions of pexpect. Therefore
-        # extra_init_cmd is run here:
-        self.run_command(extra_init_cmd)
+                 extra_init_cmd=None, line_output_callback=None):
+        self.line_output_callback = line_output_callback
+        replwrap.REPLWrapper.__init__(self, cmd_or_spawn, orig_prompt,
+                                      prompt_change, extra_init_cmd=extra_init_cmd)
 
     def _expect_prompt(self, timeout=-1):
-        if timeout == None or timeout == 1:
-            # "None" means we are executing code from a Jupyter cell.  The "timeout==1" case
-            # is a workaround for a problem in pexpect 3.3 that breaks incremental output.
-            # In either case, do incremental output:
+        if timeout == None:
+            # "None" means we are executing code from a Jupyter cell by way of the run_command
+            # in the do_execute() code below, so do incremental output.
             while True:
-                pos = self.child.expect_exact([self.prompt, self.continuation_prompt, '\r\n'],
+                pos = self.child.expect_exact([self.prompt, self.continuation_prompt, u'\r\n'],
                                               timeout=None)
                 if pos == 2:
                     # End of line received
-                    self.bkernel.process_output(self.child.before + '\n')
+                    self.line_output_callback(self.child.before + '\n')
                 else:
                     if len(self.child.before) != 0:
                         # prompt received, but partial line precedes it
-                        self.bkernel.process_output(self.child.before)
+                        self.line_output_callback(self.child.before)
                     break
         else:
             # Otherwise, use existing non-incremental code
@@ -89,18 +87,21 @@ class BashKernel(Kernel):
         # so that bash and its children are interruptible.
         sig = signal.signal(signal.SIGINT, signal.SIG_DFL)
         try:
-            # Use IREPLWrapper, a subclass of REPLWrapper that gives
-            # incremental output specifically for bash_kernel.  Note
-            # that an earlier attempt code tried to use pexpect.spawn
-            # here failed because the encoding='utf-8' option was not
-            # supported on an earlier version of pexpect.
-            self.bashwrapper = IREPLWrapper("bash --norc",
-                                            u'\$', u"PS1='{0}' PS2='{1}' PROMPT_COMMAND=''",
-                                            extra_init_cmd="export PAGER=cat", bkernel=self)
-            # Execute .bashrc via the bashrc.sh wrapper provided with pexpect.
-            # (source command fails with harmless error if bashrc.sh is not installed)
-            bashrc = path.join(path.dirname(pexpect.__file__), 'bashrc.sh')
-            self.bashwrapper.run_command('source \'%s\'' % bashrc)
+            # Note: the next few lines mirror functionality in the
+            # bash() function of pexpect/replwrap.py.  Look at the
+            # source code there for comments and context for
+            # understanding the code here.
+            bashrc = os.path.join(os.path.dirname(pexpect.__file__), 'bashrc.sh')
+            child = pexpect.spawn("bash", ['--rcfile', bashrc], echo=False,
+                                  encoding='utf-8')
+            ps1 = replwrap.PEXPECT_PROMPT[:5] + u'\[\]' + replwrap.PEXPECT_PROMPT[5:]
+            ps2 = replwrap.PEXPECT_CONTINUATION_PROMPT[:5] + u'\[\]' + replwrap.PEXPECT_CONTINUATION_PROMPT[5:]
+            prompt_change = u"PS1='{0}' PS2='{1}' PROMPT_COMMAND=''".format(ps1, ps2)
+
+            # Using IREPLWrapper to get incremental output
+            self.bashwrapper = IREPLWrapper(child, u'\$', prompt_change,
+                                            extra_init_cmd="export PAGER=cat",
+                                            line_output_callback=self.process_output)
         finally:
             signal.signal(signal.SIGINT, sig)
 
@@ -135,26 +136,21 @@ class BashKernel(Kernel):
 
         interrupted = False
         try:
-            # Note: timeout=None has special meaning for IREPLWrapper
-            output = self.bashwrapper.run_command(code.rstrip(), timeout=None)
-            output = "" # output was already sent by IREPLWrapper
-        except ValueError:
-            # This handler is for the NII project and is needed because the
-            # extend_bashkernel.source code always causes a ValueError.
-            # Without this handler, everything still works except that the
-            # Jupyter web page keeps showing [*], indicating that an error
-            # has occurred.
-            output="" # not initialized because of exception, so do it here
+            # Note: timeout=None tells IREPLWrapper to do incremental
+            # output.  Also note that the return value from
+            # run_command is not needed, because the output was
+            # already sent by IREPLWrapper.
+            self.bashwrapper.run_command(code.rstrip(), timeout=None)
         except KeyboardInterrupt:
             self.bashwrapper.child.sendintr()
             interrupted = True
             self.bashwrapper._expect_prompt()
             output = self.bashwrapper.child.before
+            self.process_output(output)
         except EOF:
             output = self.bashwrapper.child.before + 'Restarting Bash'
             self._start_bash()
-
-        self.process_output(output)
+            self.process_output(output)
 
         if interrupted:
             return {'status': 'abort', 'execution_count': self.execution_count}
@@ -212,5 +208,3 @@ class BashKernel(Kernel):
         return {'matches': sorted(matches), 'cursor_start': start,
                 'cursor_end': cursor_pos, 'metadata': dict(),
                 'status': 'ok'}
-
-
