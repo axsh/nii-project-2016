@@ -4,6 +4,10 @@
 }
 
 export BASHK_PID="$BASHPID"
+export stripped_PS1="${PS1//\\?/}"
+
+# PS1 will be something like '[PEXP\[\]ECT_PROMPT>'
+# stripped_PS1 will be something like '[PEXPECT_PROMPT>'
 
 set +m
 (
@@ -39,7 +43,7 @@ blockingread()
       if [[ "$ln" == $echopat ]]; then
          # give Jupyter a return code when it asks for one
          echo "0" >&9
-         echo -n "$PS1" >&9
+         echo -n "$stripped_PS1" >&9
          continue
       fi
       ## When uncommented, this line makes cells that start with a linefeed hang.
@@ -87,7 +91,7 @@ readcell() # just example code.  Not used for now.
 }
 
 echo "Ready."
-echo -n "$PS1"
+echo -n "$stripped_PS1"
 
 basedir="$(pwd)"
 
@@ -252,7 +256,7 @@ while sleep 0.2; do
     set_if_cell_includes set-hipchat-token HIPCHAT_TOKEN
 
     if $set_value ; then
-         echo -n "$PS1"
+         echo -n "$stripped_PS1"
          continue
     fi
 
@@ -319,7 +323,7 @@ while sleep 0.2; do
 		;;
 	esac
     fi
-    echo -n "$PS1"
+    echo -n "$stripped_PS1"
 done
 )  &
 
