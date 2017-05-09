@@ -4,10 +4,14 @@
 }
 
 export BASHK_PID="$BASHPID"
-export stripped_PS1="${PS1//\\?/}"
 
+export stripped_PS1="${PS1//\\?/}"
 # PS1 will be something like '[PEXP\[\]ECT_PROMPT>'
 # stripped_PS1 will be something like '[PEXPECT_PROMPT>'
+
+export stripped_PS2="${PS2//\\?/}"
+# PS2 will be something like '[PEXP\[\]ECT_PROMPT+'
+# stripped_PS2 will be something like '[PEXPECT_PROMPT+'
 
 set +m
 (
@@ -57,7 +61,7 @@ readcell_inline()
 {
     blockingread
     input="$ln"
-    echo -n "$PS2">&9
+    echo -n "$stripped_PS2">&9
     # read rest of the cell contents
     echo SIG-startloop0 >>/tmp/usr1
     while true; do
@@ -78,7 +82,7 @@ readcell_inline()
 	input="${input}"$'\n'"${lnr}"
 
 	# Send $PS2 so that Jupyter will send us the next line, or SIGINT to the parent process if no more lines
-	echo -n "$PS2">&9
+	echo -n "$stripped_PS2">&9
         echo SIG-endloop1 >>/tmp/usr1
 	lnr=''
     done
