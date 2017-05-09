@@ -141,8 +141,6 @@ class BashKernel(Kernel):
             # run_command is not needed, because the output was
             # already sent by IREPLWrapper.
             self.bashwrapper.run_command(code.rstrip(), timeout=None)
-        except ValueError:
-            output = ""
         except KeyboardInterrupt:
             self.bashwrapper.child.sendintr()
             interrupted = True
