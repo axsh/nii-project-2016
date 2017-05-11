@@ -113,9 +113,15 @@ EOF
 	    $skip_step_if_already_done; set -e
 
 	    "$DATADIR/vmdir/ssh-to-kvm.sh" <<'EOF'
-
-pip install https://github.com/ipython-contrib/IPython-notebook-extensions/archive/master.zip --user
-
+echo
+echo --------------- pip install jupyter_contrib_nbextensions
+pip install jupyter_contrib_nbextensions
+echo
+echo --------------- jupyter contrib nbextension install --user
+jupyter contrib nbextension install --user
+echo
+echo --------------- pip install jupyter_nbextensions_configurator
+pip install jupyter_nbextensions_configurator
 EOF
 	) ; prev_cmd_failed
 
