@@ -33,9 +33,13 @@ class IREPLWrapper(replwrap.REPLWrapper):
                                       prompt_change, extra_init_cmd=extra_init_cmd)
 
     def _expect_prompt(self, timeout=-1):
-        if timeout == None:
+        if timeout == None or timeout == 1:
             # "None" means we are executing code from a Jupyter cell by way of the run_command
             # in the do_execute() code below, so do incremental output.
+            # The "timeout==1" case happens when pexpect is processing output after unexpectedly
+            # seeing a PS2 prompt after all the cell contents have been sent.  This case is the
+            # normal case when using the extend_bashkernel.*source, because it uses PS2 to grab
+            # all cell contents before sending any of it to bash.
             while True:
                 pos = self.child.expect_exact([self.prompt, self.continuation_prompt, u'\r\n'],
                                               timeout=None)
