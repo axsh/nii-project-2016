@@ -127,10 +127,10 @@ EOF
 
 	## Dynamically generate the steps for these:
 	enable_these="
-  usability/collapsible_headings/main
-  usability/init_cell/main
-  usability/runtools/main
-  usability/toc2/main
+  collapsible_headings/main
+  init_cell/main
+  runtools/main
+  toc2/main
 "
 
 	# Note, it seems that collapsible_heading has replaced hierarchical_collapse,
