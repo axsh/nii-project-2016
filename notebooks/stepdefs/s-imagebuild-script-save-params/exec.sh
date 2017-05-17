@@ -1,5 +1,5 @@
 
-output="$(ssh -qi ~/mykeypair root@10.0.2.100 cat ${job_config} 2> /dev/null | sed 's/&gt;/\>/g')"
+output="$(ssh -qi ~/mykeypair root@${INSTANCE_IP} -p ${INSTANCE_PORT} cat ${job_config} 2> /dev/null | sed 's/&gt;/\>/g')"
 
 save_dbimg_id=false
 save_appimg_id=false

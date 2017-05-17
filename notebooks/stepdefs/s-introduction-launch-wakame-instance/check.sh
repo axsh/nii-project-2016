@@ -1,7 +1,7 @@
 #!/bin/bash
 
-source ~/notebooks/stepdefs/jenkins-utility/message.conf
-source ~/notebooks/stepdefs/jenkins-utility/check_message.sh
+source ~/stepdefs/jenkins-utility/message.conf
+source ~/stepdefs/jenkins-utility/check_message.sh
 
 # in the Jupyter notebook, this is run right after doing mussel create
 # so give a little time for Wakame-vdc state to change by checking

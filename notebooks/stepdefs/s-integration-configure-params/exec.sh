@@ -1,12 +1,12 @@
-. ~/notebooks/stepdefs/jenkins-utility/xml-utility.sh
+. ~/stepdefs/jenkins-utility/xml-utility.sh
 
-output="$(ssh -qi ~/mykeypair root@10.0.2.100 cat ${job_config} 2> /dev/null | sed 's/&quot;/\"/g')"
+output="$(ssh -qi ~/mykeypair root@${INSTANCE_IP} -p ${INSTANCE_PORT} cat ${job_config} 2> /dev/null | sed 's/&quot;/\"/g')"
 
 param_names=($(get_xml_element_value "parameterDefinitions" <<< "$output" | grep -oP '(?<=<name>).*?(?=</name>)'))
 param_values=($(get_xml_element_value "parameterDefinitions" <<< "$output" | grep -oP '(?<=<defaultValue>).*?(?=</defaultValue>)'))
 
 write_file_path="/var/lib/jenkins/jobs/tiny_web.imagebuild/workspace/jenkins-tiny_web.imagebuild*"
-write_file="$(ssh -qi ~/mykeypair root@10.0.2.100 cat ${write_file_path}  2> /dev/null)"
+write_file="$(ssh -qi ~/mykeypair root@${INSTANCE_IP} -p ${INSTANCE_PORT} cat ${write_file_path}  2> /dev/null)"
 
 while read line ; do
     param_is_set=false

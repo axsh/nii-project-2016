@@ -2,8 +2,11 @@
 
 # set -euox
 
+INSTANCE_IP=$(cat ~/vdc_host_ip)
+INSTANCE_PORT=$(cat ~/vdc_instance_port)
+
 . $(dirname $0)/stepdata.conf
-. ~/notebooks/stepdefs/jenkins-utility/xml-utility.sh
+. ~/stepdefs/jenkins-utility/xml-utility.sh
 
 function incremental_log() {
     local filename="${1}"
@@ -18,11 +21,11 @@ function save_config() {
     local file="/var/lib/jenkins/jobs/${job}/config.xml"
     local xpath="${1}" base_element="${2}" element_name="${xpath##*/}"
 
-    ssh -i ~/mykeypair root@10.0.2.100 <<EOF 2> /dev/null
+    ssh -i ~/mykeypair root@${INSTANCE_IP} -p ${INSTANCE_PORT} <<EOF 2> /dev/null
         $(declare -f xml_save_backup)
         xml_save_backup "${file}" "${element_name}" "${xpath}"
 EOF
-    scp -i ~/mykeypair root@10.0.2.100:/tmp/"${element_name}".data-student $(dirname $0)/xml-data/"${base_element}".data-student &> /dev/null
+    scp -i ~/mykeypair root@${INSTANCE_IP} -p ${INSTANCE_PORT}:/tmp/"${element_name}".data-student $(dirname $0)/xml-data/"${base_element}".data-student &> /dev/null
     [[ -f $(dirname $0)/xml-data/"${base_element}".data-student ]] || { echo "[WARNING] Expected configuration data not found." ; return 1 ; }
     incremental_log $(dirname $0)/xml-data/"${base_element}".data-student
 }

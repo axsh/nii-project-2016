@@ -1,7 +1,7 @@
 #!/bin/bash
 
-source ~/notebooks/stepdefs/jenkins-utility/message.conf
-source ~/notebooks/stepdefs/jenkins-utility/check_message.sh
+source ~/stepdefs/jenkins-utility/message.conf
+source ~/stepdefs/jenkins-utility/check_message.sh
 
 KEYFILE=/tmp/jenkins-ci.org.key
 [ -f $KEYFILE ] || \
@@ -15,7 +15,7 @@ KEYID=$(echo $(gpg --throw-keyids < $KEYFILE 2>/tmp/gpg.stderr)|cut -c11-18|tr [
 
 # from http://unix.stackexchange.com/questions/21226/how-can-i-verify-that-a-pgp-key-is-imported-into-rpm
 
-ssh -qi ~/mykeypair root@10.0.2.100 <<EOF 2>/dev/null
+ssh -qi ~/mykeypair root@${INSTANCE_IP} -p ${INSTANCE_PORT} <<EOF 2>/dev/null
 rpm -q gpg-pubkey-$KEYID
 EOF
 

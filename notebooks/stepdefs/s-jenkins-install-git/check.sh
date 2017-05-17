@@ -9,7 +9,7 @@
 #  Added url parameter to sample (config git parameter)
 #  Added build schedule (config)
 
-ssh="ssh root@10.0.2.100 -i ~/mykeypair"
+ssh="ssh root@${INSTANCE_IP} -p ${INSTANCE_PORT} -i ~/mykeypair"
 jobs=(sample)
 xml_file=(hudson.plugins.git.GitSCM.xml
          sample-git-1.xml)

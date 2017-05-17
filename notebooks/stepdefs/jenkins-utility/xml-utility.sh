@@ -2,7 +2,7 @@
 
 function xml_to_vm() {
     for file in "${xml_file[@]}"; do
-        scp -i ~/mykeypair ~/notebooks/stepdefs/jenkins-config/${file} root@10.0.2.100:/home &> /dev/null
+        scp -i ~/mykeypair ~/stepdefs/jenkins-config/${file} root@${INSTANCE_IP} -p ${INSTANCE_PORT}:/home &> /dev/null
         if [ ! -z ${GITHUB_USER} ] && [ ! -z ${GITHUB_REPO} ] ; then
             replace_git_repo ${file}
         fi

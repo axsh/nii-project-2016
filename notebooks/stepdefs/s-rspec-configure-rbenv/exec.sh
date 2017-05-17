@@ -1,4 +1,4 @@
-output="$(ssh -i ~/mykeypair root@${INSTANCE_IP} cat ${job_config} 2> /dev/null)"
+output="$(ssh -i ~/mykeypair root@${INSTANCE_IP} -p ${INSTANCE_PORT} cat ${job_config} 2> /dev/null)"
 
 test1_passed=false
 test2_passed=false

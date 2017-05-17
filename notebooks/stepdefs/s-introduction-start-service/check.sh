@@ -1,9 +1,9 @@
 #!/bin/bash
 
-source ~/notebooks/stepdefs/jenkins-utility/message.conf
-source ~/notebooks/stepdefs/jenkins-utility/check_message.sh
+source ~/stepdefs/jenkins-utility/message.conf
+source ~/stepdefs/jenkins-utility/check_message.sh
 
-out="$(ssh -qi ~/mykeypair root@10.0.2.100 'service jenkins status' 2>&1)"
+out="$(ssh -qi ~/mykeypair root@${INSTANCE_IP} -p ${INSTANCE_PORT} 'service jenkins status' 2>&1)"
 echo "$out"
 
 [[ "$out" == *jenkins*running* ]]

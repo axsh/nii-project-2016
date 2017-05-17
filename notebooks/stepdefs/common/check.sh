@@ -49,7 +49,7 @@ function check_param_value() {
 }
 
 function check_plugins_exists () {
-    plugins="$(ssh -i ~/mykeypair root@10.0.2.100 ls /var/lib/jenkins/plugins/ 2> /dev/null)"
+    plugins="$(ssh -i ~/mykeypair root@${INSTANCE_IP} -p ${INSTANCE_PORT} ls /var/lib/jenkins/plugins/ 2> /dev/null)"
     for plugin in $@;  do
         if [[ "$plugins" != *"$plugin"* ]] ; then
             return 1
@@ -122,10 +122,11 @@ function check_plugins_exists () {
 #     echo "${lines[@]}"
 # }
 
-INSTANCE_IP=10.0.2.100
+INSTANCE_IP=$(cat ~/vdc_host_ip)
+INSTANCE_PORT=$(cat ~/vdc_instance_port)
 
-. ~/notebooks/stepdefs/jenkins-utility/message.conf
-. ~/notebooks/stepdefs/jenkins-utility/check_message.sh
+. ~/stepdefs/jenkins-utility/message.conf
+. ~/stepdefs/jenkins-utility/check_message.sh
 [[ -f $(dirname $0)/stepdata.conf ]] && . $(dirname $0)/stepdata.conf
 jenkins_dir="/var/lib/jenkins/"
 job_config="${jenkins_dir}/jobs/${job}/config.xml"

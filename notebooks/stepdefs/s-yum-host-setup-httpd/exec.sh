@@ -1,4 +1,4 @@
-output="$(ssh -qi ~/mykeypair root@${INSTANCE_IP} 'service httpd status' 2> /dev/null)"
+output="$(ssh -qi ~/mykeypair root@${INSTANCE_IP} -p ${INSTANCE_PORT} 'service httpd status' 2> /dev/null)"
 
 started_httpd=false
 

@@ -1,9 +1,9 @@
 #!/bin/bash
 
-source ~/notebooks/stepdefs/jenkins-utility/message.conf
-source ~/notebooks/stepdefs/jenkins-utility/check_message.sh
+source ~/stepdefs/jenkins-utility/message.conf
+source ~/stepdefs/jenkins-utility/check_message.sh
 
-: ${IP:=10.0.2.100}
+: "${IP:=$(cat ~/vdc_host_ip) -p $(cat ~/vdc_instance_port)}"
 
 output="$(ssh -qi ~/mykeypair root@${IP} 'curl -I -s http://localhost:8080/')"
 

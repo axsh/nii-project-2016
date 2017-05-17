@@ -1,7 +1,7 @@
 #!/bin/bash
 
-source ~/notebooks/stepdefs/jenkins-utility/message.conf
-source ~/notebooks/stepdefs/jenkins-utility/check_message.sh
+source ~/stepdefs/jenkins-utility/message.conf
+source ~/stepdefs/jenkins-utility/check_message.sh
 
 (
     fail()

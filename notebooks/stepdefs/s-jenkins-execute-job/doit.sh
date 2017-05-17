@@ -8,7 +8,7 @@
 #  Create job, sample using predefind configuration file.
 #  Create job, sample2 using predefined configuration file.
 
-ssh="ssh root@10.0.2.100 -i ~/mykeypair"
+ssh="ssh root@${INSTANCE_IP} -p ${INSTANCE_PORT} -i ~/mykeypair"
 jobs=(sample
       sample2)
 xml_file=(sample-1.xml
