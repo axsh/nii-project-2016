@@ -1,4 +1,4 @@
-output="$(ssh -qi /home/centos/mykeypair root@${INSTANCE_IP} 'rpm -qa' 2> /dev/null)"
+output="$(ssh -qi ~/mykeypair root@${INSTANCE_IP} 'rpm -qa' 2> /dev/null)"
 
 installed_git=false
 installed_rpmbuild=false

@@ -3,7 +3,7 @@
 # set -euox
 
 . $(dirname $0)/stepdata.conf
-. /home/centos/notebooks/stepdefs/jenkins-utility/xml-utility.sh
+. ~/notebooks/stepdefs/jenkins-utility/xml-utility.sh
 
 function incremental_log() {
     local filename="${1}"
@@ -18,11 +18,11 @@ function save_config() {
     local file="/var/lib/jenkins/jobs/${job}/config.xml"
     local xpath="${1}" base_element="${2}" element_name="${xpath##*/}"
 
-    ssh -i /home/centos/mykeypair root@10.0.2.100 <<EOF 2> /dev/null
+    ssh -i ~/mykeypair root@10.0.2.100 <<EOF 2> /dev/null
         $(declare -f xml_save_backup)
         xml_save_backup "${file}" "${element_name}" "${xpath}"
 EOF
-    scp -i /home/centos/mykeypair root@10.0.2.100:/tmp/"${element_name}".data-student $(dirname $0)/xml-data/"${base_element}".data-student &> /dev/null
+    scp -i ~/mykeypair root@10.0.2.100:/tmp/"${element_name}".data-student $(dirname $0)/xml-data/"${base_element}".data-student &> /dev/null
     [[ -f $(dirname $0)/xml-data/"${base_element}".data-student ]] || { echo "[WARNING] Expected configuration data not found." ; return 1 ; }
     incremental_log $(dirname $0)/xml-data/"${base_element}".data-student
 }

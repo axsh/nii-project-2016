@@ -9,7 +9,7 @@
 #  Create job sample using predefined configuration file.
 #  Restart jenkins
 
-ssh="ssh root@10.0.2.100 -i /home/centos/mykeypair"
+ssh="ssh root@10.0.2.100 -i ~/mykeypair"
 jobs=(test-rbenv)
 xml_file=(sample-unit-test-0.xml)
 

@@ -1,4 +1,4 @@
-output="$(ssh -i /home/centos/mykeypair root@${INSTANCE_IP} cat ${job_config} 2> /dev/null)"
+output="$(ssh -i ~/mykeypair root@${INSTANCE_IP} cat ${job_config} 2> /dev/null)"
 
 test_passed=false
 

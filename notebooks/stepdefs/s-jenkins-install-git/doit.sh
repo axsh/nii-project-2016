@@ -10,7 +10,7 @@
 #  Create job sample using predefined configuration file.
 #  Restart jenkins
 
-ssh="ssh root@10.0.2.100 -i /home/centos/mykeypair"
+ssh="ssh root@10.0.2.100 -i ~/mykeypair"
 jobs=(sample)
 xml_file=(hudson.plugins.git.GitSCM.xml
          sample-git-1.xml)

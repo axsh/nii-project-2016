@@ -7,7 +7,7 @@
 #  Job test-rbenv created
 #  Added shell script parameters to test-rbenv (config)
 
-ssh="ssh root@10.0.2.100 -i /home/centos/mykeypair"
+ssh="ssh root@10.0.2.100 -i ~/mykeypair"
 jenkins_dir="/var/lib/jenkins"
 
 jobs=(test-rbenv)

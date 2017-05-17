@@ -1,4 +1,4 @@
-output="$(ssh -qi /home/centos/mykeypair root@${INSTANCE_IP} 'rpm -qi example' 2> /dev/null)"
+output="$(ssh -qi ~/mykeypair root@${INSTANCE_IP} 'rpm -qi example' 2> /dev/null)"
 
 [[ "$output" == *0.2.0* ]]
 test_passed=$?

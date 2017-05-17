@@ -1,7 +1,7 @@
 
-. /home/centos/notebooks/stepdefs/jenkins-utility/xml-utility.sh
+. ~/notebooks/stepdefs/jenkins-utility/xml-utility.sh
 
-output="$(ssh -qi /home/centos/mykeypair root@10.0.2.100 cat ${job_config} 2> /dev/null | sed 's/&quot;/\"/g')"
+output="$(ssh -qi ~/mykeypair root@10.0.2.100 cat ${job_config} 2> /dev/null | sed 's/&quot;/\"/g')"
 param_names=($(get_xml_element_value "parameterDefinitions" <<< "$output" | grep -oP '(?<=<name>).*?(?=</name>)'))
 
 param_is_set=(

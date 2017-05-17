@@ -1,4 +1,4 @@
-ssh -qi /home/centos/mykeypair root@10.0.2.100 <<EOF 2> /dev/null
+ssh -qi ~/mykeypair root@10.0.2.100 <<EOF 2> /dev/null
 
 # Installs jenkins cli tool to make calls through terminal
 curl -O http://localhost:8080/jnlpJars/jenkins-cli.jar

@@ -8,7 +8,7 @@
 #  Create job, sample using predefind configuration file.
 #  Create job, sample2 using predefined configuration file.
 
-ssh="ssh root@10.0.2.100 -i /home/centos/mykeypair"
+ssh="ssh root@10.0.2.100 -i ~/mykeypair"
 jobs=(sample
       sample2)
 xml_file=(sample-1.xml

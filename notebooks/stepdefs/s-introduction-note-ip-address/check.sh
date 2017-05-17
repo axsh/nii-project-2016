@@ -1,7 +1,7 @@
 #!/bin/bash
 
-source /home/centos/notebooks/stepdefs/jenkins-utility/message.conf
-source /home/centos/notebooks/stepdefs/jenkins-utility/check_message.sh
+source ~/notebooks/stepdefs/jenkins-utility/message.conf
+source ~/notebooks/stepdefs/jenkins-utility/check_message.sh
 
 (
     fail()
@@ -10,9 +10,9 @@ source /home/centos/notebooks/stepdefs/jenkins-utility/check_message.sh
 	exit 1
     }
 
-    [ -f /home/centos/jenkins-instance-ip ] || fail "File /home/centos/jenkins-instance-ip not found"
+    [ -f ~/jenkins-instance-ip ] || fail "File ~/jenkins-instance-ip not found"
 
-    IP="$(< /home/centos/jenkins-instance-ip)"
+    IP="$(< ~/jenkins-instance-ip)"
 
     [[ "$IP" == *.*.*.* ]] || fail "$IP is not a valid IP address"
 

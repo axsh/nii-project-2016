@@ -1,7 +1,7 @@
 #!/bin/bash
 
-. /home/centos/notebooks/stepdefs/jenkins-utility/message.conf
-. /home/centos/notebooks/stepdefs/jenkins-utility/check_message.sh 
+. ~/notebooks/stepdefs/jenkins-utility/message.conf
+. ~/notebooks/stepdefs/jenkins-utility/check_message.sh 
 
 check-wakame.sh
 

@@ -10,7 +10,7 @@
 #  Create job sample using predefined configuration file.
 #  Restart jenkins
 
-ssh="ssh root@10.0.2.100 -i /home/centos/mykeypair"
+ssh="ssh root@10.0.2.100 -i ~/mykeypair"
 jobs=(test-notification)
 xml_file=(jenkins.plugins.hipchat.HipChatNotifier.xml
          sample-hipchat-0.xml)

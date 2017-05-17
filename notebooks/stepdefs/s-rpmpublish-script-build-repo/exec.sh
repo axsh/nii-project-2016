@@ -1,4 +1,4 @@
-output="$(ssh -qi /home/centos/mykeypair root@10.0.2.100 cat ${job_config} 2> /dev/null)"
+output="$(ssh -qi ~/mykeypair root@10.0.2.100 cat ${job_config} 2> /dev/null)"
 
 repo_dir="/var/www/html/pub"
 found_line=$(get_line_with "=*$repo_dir" <<< "${output}")

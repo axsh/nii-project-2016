@@ -1,4 +1,4 @@
-output="$(ssh -i /home/centos/mykeypair root@10.0.2.100 cat ${filename} 2> /dev/null)"
+output="$(ssh -i ~/mykeypair root@10.0.2.100 cat ${filename} 2> /dev/null)"
 
 test1_passed=false
 test2_passed=false

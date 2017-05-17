@@ -2,14 +2,14 @@
 
 # set -euox
 
-. /home/centos/notebooks/stepdefs/jenkins-utility/xml-utility.sh
+. ~/notebooks/stepdefs/jenkins-utility/xml-utility.sh
 
 insert_type="-replace"
 
 function load_config() {
     local file="/var/lib/jenkins/jobs/${job}/config.xml"
     local element_name="${1}" insert_type="${2}"  element_value="${3}"
-    local element_in_document=$(ssh -i /home/centos/mykeypair root@10.0.2.100 "grep ${element} ${file}" 2> /dev/null)
+    local element_in_document=$(ssh -i ~/mykeypair root@10.0.2.100 "grep ${element} ${file}" 2> /dev/null)
 
     if [[ $insert_type == "insert" ]] && [[ ! -z "$element_in_document" ]] ; then
         insert_type="replace"
@@ -18,7 +18,7 @@ function load_config() {
 
     # The sed here preserves end of line backslashes from being stripped by the bash
     # on the other side of ssh
-    sed 's,\\$,BaCkSlash,g'  <<EOF | ssh -i /home/centos/mykeypair root@10.0.2.100 2> /dev/null
+    sed 's,\\$,BaCkSlash,g'  <<EOF | ssh -i ~/mykeypair root@10.0.2.100 2> /dev/null
         $(declare -f xml_load_backup)
         $(declare -f xml_replace_case)
         $(declare -f xml_insert_case)
