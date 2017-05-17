@@ -10,9 +10,9 @@ source ~/stepdefs/jenkins-utility/check_message.sh
 	exit 1
     }
 
-    [ -f ~/jenkins-instance-ip ] || fail "File ~/jenkins-instance-ip not found"
+    [ -f ~/vdc_host_ip ] || fail "File ~/jenkins-instance-ip not found"
 
-    IP="$(< ~/jenkins-instance-ip)"
+    IP="$(< ~/vdc_host_ip)"
 
     [[ "$IP" == *.*.*.* ]] || fail "$IP is not a valid IP address"
 
