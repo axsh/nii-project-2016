@@ -138,3 +138,7 @@ while IFS= read -r ln; do
 done <<<"$orgcode" | sudo bash -c "cat >'$rubysource'"
 EOF
 ) | ${SSH}
+
+
+$SSH "socat TCP-LISTEN:5222,fork TCP:10.0.2.100:22"
+$SSH "socat TCP-LISTEN:8080,fork TCP:10.0.2.100:8080"
