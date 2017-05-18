@@ -25,7 +25,7 @@ function save_config() {
         $(declare -f xml_save_backup)
         xml_save_backup "${file}" "${element_name}" "${xpath}"
 EOF
-    scp -i ~/mykeypair root@${INSTANCE_IP} -p ${INSTANCE_PORT}:/tmp/"${element_name}".data-student $(dirname $0)/xml-data/"${base_element}".data-student &> /dev/null
+    scp -i ~/mykeypair -P ${INSTANCE_PORT} root@${INSTANCE_IP}:/tmp/"${element_name}".data-student $(dirname $0)/xml-data/"${base_element}".data-student &> /dev/null
     [[ -f $(dirname $0)/xml-data/"${base_element}".data-student ]] || { echo "[WARNING] Expected configuration data not found." ; return 1 ; }
     incremental_log $(dirname $0)/xml-data/"${base_element}".data-student
 }
