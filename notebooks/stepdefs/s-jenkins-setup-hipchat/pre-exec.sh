@@ -13,7 +13,7 @@ cat <<XML_FILE > "$filename"
 <?xml version='1.0' encoding='UTF-8'?>
 <jenkins.plugins.hipchat.HipChatNotifier_-DescriptorImpl plugin="hipchat@1.0.0">
   <server>api.hipchat.com</server>
-  <token>token</token>
+  <credentialId>credential-ID</credentialId>
   <v2Enabled>false</v2Enabled>
   <room>room</room>
   <sendAs>Jenkins</sendAs>

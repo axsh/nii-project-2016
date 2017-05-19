@@ -5,7 +5,7 @@ test2_passed=false
 test3_passed=false
 
 check_plugins_exists "hipchat" && test1_passed=true
-check_not_empty system_config "token" <<< "$output" && test2_passed=true
+check_not_empty system_config "credentialId" <<< "$output" && test2_passed=true
 check_not_empty system_config "room" <<< "$output" && test3_passed=true
 
 check_message $test1_passed "$plugin_installed_status"
