@@ -23,4 +23,4 @@ $changed && { check_find_line_with "rsync" "sudo" "-avx" "$repo_dir" <<< "$outpu
     done
 }
 
-check_message $synched "\${HOME}/rpmbuils/RPMS gets synchronized with /var/www/html/pub"
+check_message $synched "\${HOME}/rpmbuild/RPMS gets synchronized with /var/www/html/pub"

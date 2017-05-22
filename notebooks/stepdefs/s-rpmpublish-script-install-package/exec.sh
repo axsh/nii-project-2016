@@ -7,8 +7,6 @@ test2_passed=false
     check_find_line_with "sudo" "yum" "install" "httpd" && test1_passed=true
     check_find_line_with "sudo" "/etc/init.d/httpd" "start" && test2_passed=true
     check_find_line_with "sudo" "service" "httpd" "start" && test2_passed=true
-
-
 } <<< "${output}"
 
 check_message $test1_passed "httpd gets installed"
