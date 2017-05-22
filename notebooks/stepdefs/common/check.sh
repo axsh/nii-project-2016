@@ -14,7 +14,10 @@ function check_find_line_with() {
         done
         $passed_check && {
             found=$(( $found+1 ))
-            [[ $found -eq $occurances ]] && return 0 
+            [[ $found -eq $occurances ]] && {
+                [[ $RETURN_LINE == "true" ]] && echo "${line}"
+                return 0
+            }
         }
     done
     return 1
