@@ -5,7 +5,7 @@ output="$(ssh -qi ~/mykeypair root@${INSTANCE_IP} -p ${INSTANCE_PORT} cat ${job_
 param_names=($(get_xml_element_value "parameterDefinitions" <<< "$output" | grep -oP '(?<=<name>).*?(?=</name>)'))
 param_values=($(get_xml_element_value "parameterDefinitions" <<< "$output" | grep -oP '(?<=<defaultValue>).*?(?=</defaultValue>)'))
 
-write_file_path="/var/lib/jenkins/jobs/tiny_web.imagebuild/workspace/jenkins-tiny_web.imagebuild*"
+write_file_path="$(ssh root@157.1.140.140 -p 15222 -i mykeypair cat /var/lib/jenkins/jobs/tiny_web.imagebuild/workspace/jenkins-tiny_web.imagebuild* | tail -1)"
 write_file="$(ssh -qi ~/mykeypair root@${INSTANCE_IP} -p ${INSTANCE_PORT} cat ${write_file_path}  2> /dev/null)"
 
 while read line ; do
