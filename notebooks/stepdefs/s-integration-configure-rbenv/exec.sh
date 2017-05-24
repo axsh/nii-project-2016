@@ -3,7 +3,7 @@ output="$(ssh -i ~/mykeypair root@${INSTANCE_IP} -p ${INSTANCE_PORT} cat ${job_c
 test1_passed=false
 test2_passed=false
 
-check_find_line_with "version" "2.0.0-p598" <<< "$output" && test1_passed=true
+check_find_line_with "version" "2.2.2" <<< "$output" && test1_passed=true
 check_find_line_with "gem__list" "bundler" "rake" <<< "$output" && test2_passed=true
 
 check_message $test1_passed "$rbenv_version_status"
